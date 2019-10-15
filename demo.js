@@ -25,3 +25,16 @@ const Batcher = require('.')
   const three = await batcher(2)
   console.log(two, three, batcher.callCount) // 2 3 2
 })()
+
+
+;(async function withLimit () {
+  const batcher = new Batcher(vals => vals.map(x => x + 1), {limit: 2})
+
+  const oneTwoThreeFour = await Promise.all([
+    batcher(1),
+    batcher(2),
+    batcher(3),
+    batcher(4)
+  ])
+  console.log(...oneTwoThreeFour, batcher.callCount) // 2 3 4 5 2
+})()
