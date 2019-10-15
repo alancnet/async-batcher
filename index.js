@@ -1,25 +1,28 @@
+const FIFO = require('./fifo')
+
 /**
  * 
  * @param {function} fn Function that given an array of arguments, returns or resolves an array of results.
  * @param {Object} options
  * @param {Number} options.delay Interval in milliseconds to wait for additional input before batching. Default: 0
  * @param {Boolean} options.parallel To run simultaneously, or not to run simultaneously. That is the boolean.
+ * @param {Number} options.limit Max number of requests per call.
  * @returns {Function} A function to call with an argument that will resolve with a result.
  */
 
 function Batcher(fn, {
   delay = 0,
-  parallel = false
+  parallel = false,
+  limit = Infinity
 } = {}) {
-  let requests = new Map()
-
   let requesting = 0
 
+  const queue = FIFO()
+
   const check = () => {
-    if ((!requesting || parallel) && requests.size) {
+    if ((!requesting || parallel) && queue.length && queue.first().size) {
       requesting++
-      const reqs = requests
-      requests = new Map()
+      const reqs = queue.shift()
       const args = Array.from(reqs.keys())
       batcher.callCount++
       Promise.resolve(fn(args))
@@ -50,6 +53,9 @@ function Batcher(fn, {
     if (arguments.length !== 1) throw new Error('Expected one argument')
     recheck()
     return new Promise((resolve, reject) => {
+      if (!queue.length) queue.push(new Map())
+      let requests = queue.last()
+      if (requests.size >= limit) queue.push(requests = new Map())
       if (!requests.has(arg)) requests.set(arg, [])
       requests.get(arg).push({arg, resolve, reject})
     })
