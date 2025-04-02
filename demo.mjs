@@ -1,4 +1,4 @@
-const Batcher = require('.')
+import Batcher from './batcher.js'
 
 ;(async function simple () {
   const batcher = new Batcher(vals => vals.map(x => x + 1))

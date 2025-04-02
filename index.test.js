@@ -1,4 +1,4 @@
-const Batcher = require('./index');
+const Batcher = require('./batcher');
 const FIFO = require('./fifo');
 
 describe('Batcher', () => {

@@ -2,7 +2,7 @@
   "name": "async-batcher",
   "version": "1.0.3",
   "description": "",
-  "main": "index.js",
+  "main": "batcher.js",
   "types": "batcher.d.ts",
   "scripts": {
     "test": "jest"

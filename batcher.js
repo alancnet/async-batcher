@@ -65,4 +65,4 @@ function Batcher(fn, {
   return batcher
 }
 
-module.exports = Batcher
+module.exports = Batcher;
