@@ -16,11 +16,22 @@ interface BatcherInstance extends Function {
 
 type Batcher<T, U> = ((item: T) => Promise<U>) & BatcherInstance
 
-declare const BatcherFactory: {
+declare const createBatcher: {
   new <T, U>(fn: (items: T[]) => (Promise<U[]> | U[]), options?:IBatcherOptions): Batcher<T, U>
 } & {
   <T, U>(fn: (items: T[]) => (Promise<U[]> | U[]), options?:IBatcherOptions): Batcher<T, U>
 }
 
-export type { Batcher };
-export default BatcherFactory;
+declare const createSeries: {
+  new <T, U>(fn: (items: T) => (Promise<U> | U), options?:IBatcherOptions): Batcher<T, U>
+} & {
+  <T, U>(fn: (items: T) => (Promise<U> | U), options?:IBatcherOptions): Batcher<T, U>
+}
+
+export type { Batcher, IBatcherOptions };
+export {
+  createSeries,
+  createBatcher,
+  createBatcher as create
+};
+export default createBatcher;

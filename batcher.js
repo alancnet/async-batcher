@@ -10,7 +10,7 @@ const FIFO = require('./fifo')
  * @returns {Function} A function to call with an argument that will resolve with a result.
  */
 
-function Batcher(fn, {
+function batcher(fn, {
   delay = 0,
   parallel = false,
   limit = Infinity
@@ -65,4 +65,20 @@ function Batcher(fn, {
   return batcher
 }
 
-module.exports = Batcher;
+/**
+ * 
+ * @param {function} fn Function that given an array of arguments, returns or resolves an array of results.
+ * @returns {Function} A function to call with an argument that will resolve with a result.
+ */
+function createSeries(fn) {
+  return batcher(async (vals) => [await fn(vals[0])], {
+    parallel: false,
+    limit: 1,
+    delay: 0
+  })
+}
+
+module.exports = batcher;
+module.exports.create = batcher;
+module.exports.createBatcher = batcher;
+module.exports.createSeries = createSeries;

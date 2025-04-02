@@ -12,15 +12,15 @@ npm install async-batcher
 
 ## Usage
 
-`async-batcher` allows you to batch multiple calls to an asynchronous function, reducing overhead and improving performance.
+`async-batcher` provides two utilities: `createBatcher` and `createSeries`. These utilities allow you to manage asynchronous calls efficiently, either by batching them or enforcing sequential execution.
 
-### Example
+### Example: `createBatcher`
 
 ```javascript
-const Batcher = require('async-batcher');
+const { createBatcher } = require('async-batcher');
 
 // Create a batcher instance
-const batcher = new Batcher((vals) => vals.map((x) => x + 1));
+const batcher = createBatcher((vals) => vals.map((x) => x + 1));
 
 // Batch multiple calls
 const results = await Promise.all([
@@ -32,9 +32,25 @@ console.log(...results); // Output: 2 3
 console.log(batcher.callCount); // Output: 1
 ```
 
+### Example: `createSeries`
+
+```javascript
+const { createSeries } = require('async-batcher');
+
+// Create a series instance
+const series = createSeries(async (val) => val + 1);
+
+// Process calls one at a time
+const result1 = await series(1);
+const result2 = await series(2);
+const result3 = await series(3);
+
+console.log(result1, result2, result3); // Output: 2 3 4
+```
+
 ## API
 
-### `Batcher(fn, options)`
+### `createBatcher(fn, options)`
 
 Creates a batching function.
 
@@ -62,12 +78,25 @@ A callable function `(arg: T) => Promise<R>` with the following property:
 - **`callCount`**: `number`  
   Tracks the number of times the batcher function has been called.
 
-### Example with Options
+### `createSeries(fn)`
+
+Creates a function that enforces sequential execution of asynchronous calls.
+
+#### Parameters
+
+- **`fn`**: `(arg: T) => R | Promise<R>`  
+  A function that takes a single argument and returns (or resolves to) a result.
+
+#### Returns
+
+A callable function `(arg: T) => Promise<R>`.
+
+### Example with `createBatcher` Options
 
 ```javascript
-const Batcher = require('async-batcher');
+const { createBatcher } = require('async-batcher');
 
-const batcher = new Batcher(
+const batcher = createBatcher(
   async (vals) => vals.map((x) => x * 2),
   { delay: 100, parallel: true, limit: 5 }
 );
@@ -82,20 +111,41 @@ console.log(results); // Output: [2, 4, 6]
 console.log(batcher.callCount); // Output: 1
 ```
 
+### Example with `createSeries`
+
+```javascript
+const { createSeries } = require('async-batcher');
+
+const series = createSeries(async (val) => {
+  console.log(`Processing ${val}`);
+  return val * 2;
+});
+
+const result1 = await series(1);
+const result2 = await series(2);
+const result3 = await series(3);
+
+console.log(result1, result2, result3); // Output: 2 4 6
+```
+
 ## TypeScript Support
 
 This package includes TypeScript type definitions. You can use it seamlessly in TypeScript projects:
 
 ```typescript
-import Batcher from 'async-batcher';
+import { createBatcher, createSeries } from 'async-batcher';
 
-const batcher = new Batcher<number, number>(
+const batcher = createBatcher<number, number>(
   async (vals) => vals.map((x) => x * 2),
   { delay: 50 }
 );
 
 const result = await batcher(5);
 console.log(result); // Output: 10
+
+const series = createSeries<number, number>(async (val) => val * 2);
+const seriesResult = await series(5);
+console.log(seriesResult); // Output: 10
 ```
 
 ## License

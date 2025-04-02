@@ -1,7 +1,7 @@
-import Batcher from './batcher.js'
+import { createBatcher, createSeries, type Batcher } from './batcher.js'
 
 ;(async function simple () {
-  const batcher = new Batcher<number, number>(vals => vals.map(x => x + 1))
+  const batcher: Batcher<number, number> = createBatcher(vals => vals.map(x => x + 1))
 
   const two = await batcher(1)
   const three = await batcher(2)
@@ -9,7 +9,7 @@ import Batcher from './batcher.js'
 })()
 
 ;(async function array () {
-  const batcher = new Batcher<number, number>(vals => vals.map(x => x + 1))
+  const batcher = createBatcher<number, number>(vals => vals.map(x => x + 1))
 
   const twoThree = await Promise.all([
     batcher(1),
@@ -20,7 +20,7 @@ import Batcher from './batcher.js'
 
 
 ;(async function withLimit () {
-  const batcher = new Batcher<number, number>(vals => vals.map(x => x + 1), {limit: 2})
+  const batcher = createBatcher<number, number>(vals => vals.map(x => x + 1), {limit: 2})
 
   const oneTwoThreeFour = await Promise.all([
     batcher(1),
@@ -30,3 +30,14 @@ import Batcher from './batcher.js'
   ])
   console.log(...oneTwoThreeFour, batcher.callCount) // 2 3 4 5 2
 })()
+
+;(async function series () {
+  const batcher = createSeries<number, number>(val => val + 1)
+  const oneTwoThreeFour = await Promise.all([
+    batcher(1),
+    batcher(2),
+    batcher(3),
+    batcher(4)
+  ])
+  console.log(...oneTwoThreeFour, batcher.callCount) // 2 3 4 5 4
+})
